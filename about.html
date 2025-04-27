@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>sales</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+
+      body {
+          background-color: #f5f7fa;
+          height: 100vh;
+          overflow: hidden;
+      }
+
+      .container {
+          display: flex;
+          height: calc(100vh - 60px); /* Account for your header */
+          margin-top: 60px; /* Space for your header */
+      }
+
+      .order-list-panel {
+          width: 35%;
+          background-color: white;
+          border-right: 1px solid #e2e8f0;
+          padding: 1.5rem;
+          overflow-y: auto;
+          box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .panel-header {
+          margin-bottom: 1.5rem;
+      }
+
+      .panel-header h2 {
+          font-size: 1.4rem;
+          font-weight: 600;
+          color: #2c3e50;
+          margin-bottom: 0.75rem;
+          border-bottom: 2px solid #3498db;
+          padding-bottom: 0.5rem;
+          display: inline-block;
+      }
+
+      .search-bar {
+          width: 100%;
+          padding: 0.75rem;
+          border: 1px solid #cbd5e1;
+          border-radius: 0.5rem;
+          margin-top: 0.75rem;
+          font-size: 0.95rem;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      }
+
+      .search-bar:focus {
+          outline: none;
+          border-color: #3498db;
+          box-shadow: 0 2px 10px rgba(52, 152, 219, 0.2);
+      }
+
+      .order-items {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+      }
+
+      .order-item {
+          padding: 1rem;
+          border: 1px solid #e2e8f0;
+          border-radius: 0.5rem;
+          background-color: #f8fafc;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+      }
+
+      .order-item:hover {
+          background-color: #f1f5f9;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .order-item.selected {
+          background-color: #e3f2fd;
+          border-color: #3498db;
+          box-shadow: 0 4px 8px rgba(52, 152, 219, 0.15);
+      }
+
+      .order-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+      }
+
+      .order-id {
+          font-weight: 600;
+          font-size: 1.05rem;
+          color: #34495e;
+      }
+
+      .order-date {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+          background-color: #ecf0f1;
+          padding: 0.25rem 0.5rem;
+          border-radius: 0.25rem;
+      }
+
+      .order-footer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 0.5rem;
+      }
+
+      .item-count {
+          color: #7f8c8d;
+          font-size: 0.9rem;
+      }
+
+      .order-total {
+          font-weight: 600;
+          color: #2c3e50;
+          font-size: 1.1rem;
+      }
+
+      .order-details-panel {
+          width: 65%;
+          background-color: white;
+          padding: 2rem;
+          overflow-y: auto;
+      }
+
+      .receipt-header {
+          border-bottom: 2px solid #e2e8f0;
+          padding-bottom: 1.5rem;
+          margin-bottom: 1.5rem;
+          text-align: center;
+      }
+
+      .receipt-title {
+          font-size: 1.8rem;
+          font-weight: 700;
+          margin-bottom: 0.5rem;
+          color: #2c3e50;
+      }
+
+      .receipt-info {
+          margin-bottom: 1rem;
+          line-height: 1.6;
+      }
+
+      .receipt-info div {
+          margin-bottom: 0.25rem;
+      }
+
+      .items-table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 2rem;
+      }
+
+      .items-table th {
+          text-align: left;
+          padding: 0.75rem 0.5rem;
+          background-color: #f8fafc;
+          border-bottom: 2px solid #3498db;
+          color: #2c3e50;
+          font-weight: 600;
+      }
+
+      .items-table th:not(:first-child) {
+          text-align: right;
+      }
+
+      .items-table td {
+          padding: 0.75rem 0.5rem;
+          border-bottom: 1px solid #e2e8f0;
+      }
+
+      .items-table td:not(:first-child) {
+          text-align: right;
+      }
+
+      .items-table tr:hover {
+          background-color: #f8fafc;
+      }
+
+      .receipt-summary {
+          border-top: 2px solid #e2e8f0;
+          padding-top: 1.5rem;
+          padding-left: 1rem;
+          padding-right: 1rem;
+      }
+
+      .summary-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0.5rem;
+          padding: 0.25rem 0;
+      }
+
+      .summary-total {
+          font-size: 1.25rem;
+          font-weight: 700;
+          margin-bottom: 0.75rem;
+          padding: 0.5rem 0;
+          color: #2c3e50;
+          border-bottom: 1px dashed #cbd5e1;
+      }
+
+      .actions {
+          display: flex;
+          justify-content: center;
+          gap: 1.5rem;
+          margin-top: 2rem;
+      }
+
+      .btn {
+          padding: 0.75rem 1.5rem;
+          border: none;
+          border-radius: 0.5rem;
+          cursor: pointer;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          font-size: 0.95rem;
+      }
+
+      .btn-primary {
+          background-color: #3498db;
+          color: white;
+          box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+      }
+
+      .btn-primary:hover {
+          background-color: #2980b9;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
+      }
+
+      .btn-secondary {
+          background-color: #ecf0f1;
+          color: #2c3e50;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-secondary:hover {
+          background-color: #bdc3c7;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .empty-state {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #7f8c8d;
+          gap: 1rem;
+      }
+
+      .empty-state-icon {
+          font-size: 3rem;
+          color: #bdc3c7;
+      }
+
+      .empty-state-text {
+          font-size: 1.1rem;
+      }
+
+      /* Print button animation */
+      @keyframes pulse {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+          100% { transform: scale(1); }
+      }
+
+      .pulse {
+          animation: pulse 2s infinite;
+      }
+      
+  </style>
+</head>
+  <body>
+    <div class="header-wrapper">
+      <header>
+          <button id="menuButton">☰</button>
+          <h1>VIVOS MEDICAL SUPPLIES TRADING</h1>
+          <nav id="menu" class="hidden">
+              <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+                <li><a href="{{ url_for('sales') }}">Report</a></li>
+                <li><a href="{{ url_for('about') }}">Order History</a></li>
+              </ul>
+          </nav>
+      
+          <div class="account-menu">
+            <img src="{{ url_for('static', filename='redicon.jpg') }}" alt="User" class="user-icon" id="userIcon">
+            <div class="dropdown-menu" id="dropdownMenu">
+              <p id="userRole" class="label">MICHELLE VIVOS</p>
+              <hr>
+             
+              <a href="#" onclick="showOverlay('changePasswordOverlay')">Change Password</a>
+              <a id="logoutBtn">Logout</a>
+            </div>
+          </div>
+           
+          <!-- Overlay for Change Password -->
+          <div id="changePasswordOverlay" class="overlay hidden">
+            <div class="overlay-content">
+              <h3>Change Password</h3>
+              <input type="password" placeholder="Current Password">
+              <input type="password" placeholder="New Password">
+              <input type="password" placeholder="Confirm Password">
+              <button onclick="updatePassword()">Update</button>
+              <button onclick="closeOverlay('changePasswordOverlay')">Cancel</button>
+            </div>
+          </div>
+      </header>
+
+      <div class="container">    
+        <!-- Order List Panel -->
+        <div class="order-list-panel">
+            <div class="panel-header">
+                <h2>Order History</h2>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    class="search-bar" 
+                    placeholder="Search by ID or date..."
+                >
+            </div>
+            
+            <div class="order-items" id="orderList">
+                <!-- Order items will be populated here -->
+            </div>
+        </div>
+        
+        <!-- Order Details Panel -->
+        <div class="order-details-panel" id="orderDetails">
+            <div class="empty-state">
+                <div class="empty-state-icon">📃</div>
+                <p class="empty-state-text">Select an order to view details</p>
+            </div>
+        </div>
+       </div>
+
+      <script>
+          // Sample order data
+          const orders = [
+              {
+                  id: "ORD-2025-0001",
+                  date: "04/24/2025",
+                  cashier: "Michelle Vivos",
+                  items: [
+                      { name: "Wheelchair", price: 13500.00, quantity: 1, total: 13500.00 }
+                  ],
+                  total: 13500.00,
+                  amountPaid: 14000.00,
+                  change: 500.00
+              },
+              {
+                  id: "ORD-2025-0002",
+                  date: "04/23/2025",
+                  cashier: "Michelle Vivos",
+                  items: [
+                      { name: "Oxygen tanks 10 lbs", price: 3000.00, quantity: 2, total: 6000.00 },
+                      { name: "Omron Wrist BP monitor", price: 3650.00, quantity: 1, total: 3650.00 }
+                  ],
+                  total: 9650.00,
+                  amountPaid: 10000.00,
+                  change: 350.00
+              },
+              {
+                  id: "ORD-2025-0003",
+                  date: "04/22/2025",
+                  cashier: "Michelle Vivos",
+                  items: [
+                      { name: "Crutches", price: 630.00, quantity: 1, total: 630.00 },
+                      { name: "Walker", price: 2650.00, quantity: 1, total: 2650.00 }
+                  ],
+                  total: 3280.00,
+                  amountPaid: 3300.00,
+                  change: 20.00
+              },
+              {
+                  id: "ORD-2025-0004",
+                  date: "04/21/2025",
+                  cashier: "Michelle Vivos",
+                  items: [
+                      { name: "Sure-Guard Manual BP set", price: 1050.00, quantity: 2, total: 2100.00 }
+                  ],
+                  total: 2100.00,
+                  amountPaid: 2100.00,
+                  change: 0.00
+              },
+              {
+                  id: "ORD-2025-0005",
+                  date: "04/20/2025",
+                  cashier: "Michelle Vivos",
+                  items: [
+                      { name: "Wellcare Manual BP set", price: 1100.00, quantity: 1, total: 1100.00 },
+                      { name: "First Aid Kit 226", price: 850.00, quantity: 1, total: 850.00 }
+                  ],
+                  total: 1950.00,
+                  amountPaid: 2000.00,
+                  change: 50.00
+              }
+          ];
+
+          // DOM Elements
+          const orderListElement = document.getElementById('orderList');
+          const orderDetailsElement = document.getElementById('orderDetails');
+          const searchInput = document.getElementById('searchInput');
+          
+          let selectedOrderId = null;
+
+          // Format currency
+          function formatCurrency(amount) {
+              return '₱' + amount.toFixed(2);
+          }
+
+          // Render order list
+          function renderOrderList(ordersToRender) {
+              orderListElement.innerHTML = '';
+              
+              if (ordersToRender.length === 0) {
+                  orderListElement.innerHTML = '<div style="text-align: center; padding: 2rem; color: #7f8c8d;">No orders found</div>';
+                  return;
+              }
+              
+              ordersToRender.forEach(order => {
+                  const orderElement = document.createElement('div');
+                  orderElement.className = `order-item ${order.id === selectedOrderId ? 'selected' : ''}`;
+                  orderElement.dataset.orderId = order.id;
+                  
+                  orderElement.innerHTML = `
+                      <div class="order-header">
+                          <span class="order-id">${order.id}</span>
+                          <span class="order-date">${order.date}</span>
+                      </div>
+                      <div class="order-footer">
+                          <span class="item-count">${order.items.length} item(s)</span>
+                          <span class="order-total">${formatCurrency(order.total)}</span>
+                      </div>
+                  `;
+                  
+                  orderElement.addEventListener('click', () => {
+                      selectOrder(order.id);
+                  });
+                  
+                  orderListElement.appendChild(orderElement);
+              });
+          }
+
+          // Render order details
+          function renderOrderDetails(order) {
+              if (!order) {
+                  orderDetailsElement.innerHTML = `
+                      <div class="empty-state">
+                          <div class="empty-state-icon">📃</div>
+                          <p class="empty-state-text">Select an order to view details</p>
+                      </div>
+                  `;
+                  return;
+              }
+              
+              let itemsHtml = '';
+              order.items.forEach(item => {
+                  itemsHtml += `
+                      <tr>
+                          <td>${item.name}</td>
+                          <td>${formatCurrency(item.price)}</td>
+                          <td>${item.quantity}</td>
+                          <td>${formatCurrency(item.total)}</td>
+                      </tr>
+                  `;
+              });
+              
+              orderDetailsElement.innerHTML = `
+                  <div>
+                      <div class="receipt-header">
+                          <h1 class="receipt-title">VIVOS MEDICAL SUPPLIES TRADING</h1>
+                          <div class="receipt-info">
+                              <div><strong>Cashier:</strong> ${order.cashier}</div>
+                              <div><strong>Date:</strong> ${order.date}</div>
+                              <div><strong>Address:</strong> Sixto Castillo St., Poblacion 5, Tanauan City, Batangas</div>
+                              <div><strong>Order ID:</strong> ${order.id}</div>
+                          </div>
+                      </div>
+                      
+                      <table class="items-table">
+                          <thead>
+                              <tr>
+                                  <th>Item</th>
+                                  <th>Price</th>
+                                  <th>Qty</th>
+                                  <th>Total</th>
+                              </tr>
+                          </thead>
+                          <tbody>
+                              ${itemsHtml}
+                          </tbody>
+                      </table>
+                      
+                      <div class="receipt-summary">
+                          <div class="summary-row summary-total">
+                              <span>Total:</span>
+                              <span>${formatCurrency(order.total)}</span>
+                          </div>
+                          <div class="summary-row">
+                              <span>Cash Given:</span>
+                              <span>${formatCurrency(order.amountPaid)}</span>
+                          </div>
+                          <div class="summary-row">
+                              <span>Change:</span>
+                              <span>${formatCurrency(order.change)}</span>
+                          </div>
+                      </div>
+                      
+                      <div class="actions">
+                          <button class="btn btn-primary pulse" id="printBtn">Print Receipt</button>
+                      </div>
+                  </div>
+              `;
+              
+              // Add event listeners to buttons
+              document.getElementById('printBtn').addEventListener('click', () => {
+                  alert('Printing receipt for order ' + order.id);
+                  // In a real implementation, you could use window.print() or a specialized printing library
+              });
+              
+            
+          }
+
+          // Select an order
+          function selectOrder(orderId) {
+          selectedOrderId = orderId;
+                
+         // Update order list selection
+         document.querySelectorAll('.order-item').forEach(el => {
+           el.classList.remove('selected');
+           if (el.dataset.orderId === orderId) {
+           el.classList.add('selected');
+                }
+            });
+              
+          // Find the selected order
+          const order = orders.find(o => o.id === orderId);
+          renderOrderDetails(order);
+          }
+
+          // Filter orders based on search
+          function filterOrders(searchTerm) {
+              return orders.filter(order => 
+                  order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  order.date.includes(searchTerm)
+              );
+          }
+
+          // Initialize the app
+          function init() {
+              // Render initial order list
+              renderOrderList(orders);
+              
+              // Add search functionality
+              searchInput.addEventListener('input', (e) => {
+                  const searchTerm = e.target.value;
+                  const filteredOrders = filterOrders(searchTerm);
+                  renderOrderList(filteredOrders);
+              });
+          }
+
+          // Start the app
+          document.addEventListener('DOMContentLoaded', init);
+      </script>
+
+      <script src="{{ url_for('static', filename='menubutton.js') }}"></script> 
+    </body>
+
+    </html>

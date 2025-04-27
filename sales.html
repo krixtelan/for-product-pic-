@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales - Vivos Medical Supplies</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          font-family: Arial, sans-serif;
+        }
+        body {
+          background-color: #f5f6fa;
+        }
+        .header {
+          background-color: #2c3e50;
+          color: white;
+          padding: 15px 20px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        .header h1 {
+          font-size: 22px;
+        }
+        .profile-icon {
+          width: 35px;
+          height: 35px;
+          background-color: #e74c3c;
+          border-radius: 50%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: white;
+          font-weight: bold;
+        }
+        .container {
+          padding: 20px;
+        }
+        .filters {
+          margin-bottom: 20px;
+          display: flex;
+          gap: 10px;
+          align-items: center;
+        }
+        .date-input {
+          padding: 8px;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+        }
+        .btn {
+          padding: 8px 15px;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .btn-primary {
+          background-color: #3498db;
+          color: white;
+        }
+        .btn-secondary {
+          background-color: #e0e0e0;
+          color: #333;
+        }
+        .report-tabs {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 20px;
+        }
+        .tab {
+          padding: 10px 20px;
+          background-color: #e0e0e0;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .tab.active {
+          background-color: #3498db;
+          color: white;
+        }
+        .summary-cards {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 20px;
+          margin-bottom: 20px;
+        }
+        .card {
+          background-color: white;
+          border-radius: 8px;
+          padding: 20px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .card-title {
+          color: #7f8c8d;
+          font-size: 14px;
+          margin-bottom: 10px;
+        }
+        .card-value {
+          font-size: 24px;
+          font-weight: bold;
+          color: #e74c3c;
+        }
+        .card-value.blue {
+          color: #3498db;
+        }
+        .card-value.green {
+          color: #2ecc71;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          background-color: white;
+          border-radius: 8px;
+          overflow: hidden;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        th, td {
+          padding: 15px;
+          text-align: left;
+          border-bottom: 1px solid #f1f1f1;
+        }
+        th {
+          background-color: #f8f9fa;
+          font-weight: 600;
+          color: #2c3e50;
+        }
+        .stock-status {
+          padding: 5px 10px;
+          border-radius: 20px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        .in-stock {
+          background-color: #d5f5e3;
+          color: #27ae60;
+        }
+        .low-stock {
+          background-color: #fdebd0;
+          color: #f39c12;
+        }
+        .out-of-stock {
+          background-color: #fadbd8;
+          color: #e74c3c;
+        }
+        .toggle-view {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 10px;
+        }
+        .toggle-btn {
+          background-color: #f1f1f1;
+          border: none;
+          padding: 5px 10px;
+          cursor: pointer;
+        }
+        .toggle-btn.active {
+          background-color: #3498db;
+          color: white;
+        }
+        .toggle-btn:first-child {
+          border-radius: 4px 0 0 4px;
+        }
+        .toggle-btn:last-child {
+          border-radius: 0 4px 4px 0;
+        }
+      </style>
+</head>
+<body>
+    <div class="header-wrapper">
+        <header>
+            <button id="menuButton">☰</button>
+            <h1>VIVOS MEDICAL SUPPLIES TRADING</h1>
+            <nav id="menu" class="hidden">
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+                    <li><a href="{{ url_for('sales') }}">Report</a></li>
+                    <li><a href="{{ url_for('about') }}">Order History</a></li>
+                </ul>
+            </nav>
+        
+            <div class="account-menu">
+              <img src="{{ url_for('static', filename='redicon.jpg') }}" alt="User" class="user-icon" id="userIcon">
+              <div class="dropdown-menu" id="dropdownMenu">
+                <p id="userRole" class="label">MICHELLE VIVOS</p>
+                <hr>
+               
+                <a href="#" onclick="showOverlay('changePasswordOverlay')">Change Password</a>
+                <a id="logoutBtn">Logout</a>
+              </div>
+            </div>
+            
+            <!-- Overlay for Change Password -->
+            <div id="changePasswordOverlay" class="overlay hidden">
+                <div class="overlay-content">
+                    <h3>Change Password</h3>
+                    <input type="password" placeholder="Current Password">
+                    <input type="password" placeholder="New Password">
+                    <input type="password" placeholder="Confirm Password">
+                    <button onclick="updatePassword()">Update</button>
+                    <button onclick="closeOverlay('changePasswordOverlay')">Cancel</button>
+                </div>
+            </div>
+        </header>
+    </div>
+
+
+    <div class="container">
+        <div class="filters">
+          <span>From:</span>
+          <input type="date" class="date-input">
+          <span>To:</span>
+          <input type="date" class="date-input">
+          <button class="btn btn-primary">Filter</button>
+          <button class="btn btn-secondary">Reset</button>
+        </div>
+        
+        <div class="report-tabs">
+          <div class="tab active">Stock Levels</div>
+          <div class="tab">Sales Report</div>
+        </div>
+        
+        <!-- Stock Levels View -->
+        <div id="stock-view">
+          <div class="summary-cards">
+            <div class="card">
+              <div class="card-title">Total Products</div>
+              <div class="card-value">156</div>
+            </div>
+            <div class="card">
+              <div class="card-title">In Stock</div>
+              <div class="card-value green">124</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Low Stock</div>
+              <div class="card-value blue">25</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Out of Stock</div>
+              <div class="card-value">7</div>
+            </div>
+          </div>
+          
+          <div class="toggle-view">
+            <button class="toggle-btn active">All</button>
+            <button class="toggle-btn">In Stock</button>
+            <button class="toggle-btn">Low Stock</button>
+            <button class="toggle-btn">Out of Stock</button>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Current Stock</th>
+                <th>Status</th>
+                <th>Market Price (₱)</th>
+                <th>Profit Margin</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Blood Pressure Monitor - Digital</td>
+                <td>42</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+                <td>2,450.00</td>
+                <td>32%</td>
+              </tr>
+              <tr>
+                <td>Surgical Masks (50pcs)</td>
+                <td>78</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+                <td>250.00</td>
+                <td>45%</td>
+              </tr>
+              <tr>
+                <td>Pulse Oximeter</td>
+                <td>12</td>
+                <td><span class="stock-status low-stock">Low Stock</span></td>
+                <td>1,850.00</td>
+                <td>38%</td>
+              </tr>
+              <tr>
+                <td>Nebulizer Machine</td>
+                <td>25</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+                <td>3,200.00</td>
+                <td>28%</td>
+              </tr>
+              <tr>
+                <td>Digital Thermometer</td>
+                <td>8</td>
+                <td><span class="stock-status low-stock">Low Stock</span></td>
+                <td>450.00</td>
+                <td>52%</td>
+              </tr>
+              <tr>
+                <td>Wheelchair - Standard</td>
+                <td>0</td>
+                <td><span class="stock-status out-of-stock">Out of Stock</span></td>
+                <td>8,500.00</td>
+                <td>25%</td>
+              </tr>
+              <tr>
+                <td>Stethoscope</td>
+                <td>32</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+                <td>1,200.00</td>
+                <td>40%</td>
+              </tr>
+              <tr>
+                <td>Surgical Gloves (100pcs)</td>
+                <td>54</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+                <td>550.00</td>
+                <td>48%</td>
+              </tr>
+              <tr>
+                <td>First Aid Kit</td>
+                <td>18</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+                <td>750.00</td>
+                <td>35%</td>
+              </tr>
+              <tr>
+                <td>N95 Respirator Masks (20pcs)</td>
+                <td>5</td>
+                <td><span class="stock-status low-stock">Low Stock</span></td>
+                <td>980.00</td>
+                <td>42%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- Sales Report View (Hidden by default) -->
+        <div id="sales-view" style="display: none;">
+          <div class="summary-cards">
+            <div class="card">
+              <div class="card-title">Total Sales</div>
+              <div class="card-value">₱248,675.00</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Total Profit</div>
+              <div class="card-value green">₱87,036.25</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Total Items Sold</div>
+              <div class="card-value blue">342</div>
+            </div>
+            <div class="card">
+              <div class="card-title">Transactions</div>
+              <div class="card-value blue">128</div>
+            </div>
+          </div>
+          
+          <table>
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Units Sold</th>
+                <th>Sales Revenue (₱)</th>
+                <th>Total Profit (₱)</th>
+                <th>Current Stock</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Blood Pressure Monitor - Digital</td>
+                <td>32</td>
+                <td>78,400.00</td>
+                <td>25,088.00</td>
+                <td>42</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+              </tr>
+              <tr>
+                <td>Surgical Masks (50pcs)</td>
+                <td>75</td>
+                <td>18,750.00</td>
+                <td>8,437.50</td>
+                <td>78</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+              </tr>
+              <tr>
+                <td>Pulse Oximeter</td>
+                <td>45</td>
+                <td>83,250.00</td>
+                <td>31,635.00</td>
+                <td>12</td>
+                <td><span class="stock-status low-stock">Low Stock</span></td>
+              </tr>
+              <tr>
+                <td>Nebulizer Machine</td>
+                <td>18</td>
+                <td>57,600.00</td>
+                <td>16,128.00</td>
+                <td>25</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+              </tr>
+              <tr>
+                <td>Digital Thermometer</td>
+                <td>62</td>
+                <td>27,900.00</td>
+                <td>14,508.00</td>
+                <td>8</td>
+                <td><span class="stock-status low-stock">Low Stock</span></td>
+              </tr>
+              <tr>
+                <td>Wheelchair - Standard</td>
+                <td>12</td>
+                <td>102,000.00</td>
+                <td>25,500.00</td>
+                <td>0</td>
+                <td><span class="stock-status out-of-stock">Out of Stock</span></td>
+              </tr>
+              <tr>
+                <td>Stethoscope</td>
+                <td>24</td>
+                <td>28,800.00</td>
+                <td>11,520.00</td>
+                <td>32</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+              </tr>
+              <tr>
+                <td>Surgical Gloves (100pcs)</td>
+                <td>48</td>
+                <td>26,400.00</td>
+                <td>12,672.00</td>
+                <td>54</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+              </tr>
+              <tr>
+                <td>First Aid Kit</td>
+                <td>35</td>
+                <td>26,250.00</td>
+                <td>9,187.50</td>
+                <td>18</td>
+                <td><span class="stock-status in-stock">In Stock</span></td>
+              </tr>
+              <tr>
+                <td>N95 Respirator Masks (20pcs)</td>
+                <td>58</td>
+                <td>56,840.00</td>
+                <td>23,872.80</td>
+                <td>5</td>
+                <td><span class="stock-status low-stock">Low Stock</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    
+      <script>
+        // Simple tab switching functionality
+        const tabs = document.querySelectorAll('.tab');
+        const stockView = document.getElementById('stock-view');
+        const salesView = document.getElementById('sales-view');
+        
+        tabs[0].addEventListener('click', function() {
+          tabs[0].classList.add('active');
+          tabs[1].classList.remove('active');
+          stockView.style.display = 'block';
+          salesView.style.display = 'none';
+        });
+        
+        tabs[1].addEventListener('click', function() {
+          tabs[1].classList.add('active');
+          tabs[0].classList.remove('active');
+          salesView.style.display = 'block';
+          stockView.style.display = 'none';
+        });
+        
+        // Filter buttons functionality
+        const toggleBtns = document.querySelectorAll('.toggle-btn');
+        toggleBtns.forEach(btn => {
+          btn.addEventListener('click', function() {
+            toggleBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            // Additional filtering logic would go here
+          });
+        });
+
+        // Menu toggle
+       document.getElementById('menuButton').addEventListener('click', function() {
+       const menu = document.getElementById('menu');
+       menu.classList.toggle('hidden');
+        });
+
+        // User dropdown toggle
+        document.getElementById('userIcon').addEventListener('click', function() {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.classList.toggle('active');
+        });
+
+        // Close dropdowns when clicking elsewhere
+        document.addEventListener('click', function(event) {
+        const userIcon = document.getElementById('userIcon');
+        const menuButton = document.getElementById('menuButton');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        const menu = document.getElementById('menu');
+
+        if (!userIcon.contains(event.target) && !dropdownMenu.contains(event.target)) {
+            dropdownMenu.classList.remove('active');
+        }
+
+        if (!menuButton.contains(event.target) && !menu.contains(event.target)) {
+            menu.classList.add('hidden');
+        }
+        });
+      </script>
+   
+</body>
+</html>

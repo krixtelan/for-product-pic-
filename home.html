@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+
+<body>
+<div id="login-section">
+  <h1 class="company-name">VIVOS MEDICAL SUPPLIES TRADING</h1>
+  <img src="{{ url_for('static', filename='vivos.jpg') }}" alt="User Icon" class="user-icon">
+  <input type="password" id="loginPassword" placeholder="Enter Password">
+  <button class="btn" onclick="login()">Login</button>
+  <div id="loginMsg" class="error"></div>
+</div>
+
+ 
+  
+
+    <div class="header-wrapper">
+    <header>
+        <button id="menuButton">☰</button>
+        <h1>VIVOS MEDICAL SUPPLIES TRADING</h1>
+        <nav id="menu" class="hidden">
+            <ul>
+              <li><a href="{{ url_for('home') }}">Home</a></li>
+              <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+              <li><a href="{{ url_for('sales') }}">Report</a></li>
+              <li><a href="{{ url_for('about') }}">Order History</a></li>
+            </ul>
+        </nav>
+    
+        <div class="account-menu">
+          <img src="{{ url_for('static', filename='redicon.jpg') }}" alt="User" class="user-icon" id="userIcon">
+          <div class="dropdown-menu" id="dropdownMenu">
+            <p id="userRole" class="label">MICHELLE VIVOS</p>
+            <hr>
+           
+            <a href="#" onclick="showOverlay('changePasswordOverlay')">Change Password</a>
+            <a id="logoutBtn">Logout</a>
+          </div>
+        </div>
+         
+        <!-- Overlay for Change Password -->
+        <div id="changePasswordOverlay" class="overlay hidden">
+          <div class="overlay-content">
+            <h3>Change Password</h3>
+            <input type="password" placeholder="Current Password">
+            <input type="password" placeholder="New Password">
+            <input type="password" placeholder="Confirm Password">
+            <button onclick="updatePassword()">Update</button>
+            <button onclick="closeOverlay('changePasswordOverlay')">Cancel</button>
+          </div>
+        </div>
+    </header>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="pos-container">
+        <div class="products-section">
+          <input type="text" id="searchBar" placeholder="Search products...">
+          <div id="productList">
+            <!-- Sample product items -->
+            <div id="productList">
+
+            </div>
+          </div>
+        </div>
+      
+        <div class="receipt-section">
+          <div class="receipt-header">
+            <h2>VIVOS MEDICAL SUPPLIES TRADING</h2>
+            <p>Cashier: Michelle Vivos</p>
+            <p>Date: <span id="currentDate"></span></p>
+            <p>Address: Sixto Castillo St., Poblacion 5, Tanauan City, Batangas</p>
+          </div>
+          <hr />
+          <div id="receiptItems">
+            <!-- Added products go here -->
+          </div>
+          <hr/>
+          
+          <p><strong>Total: ₱<span id="totalAmount">0.00</span></strong></p>
+          <div class="payment-section">
+            <label for="cashGiven">Cash Given:</label>
+            <input type="number" id="cashGiven" placeholder="Enter cash..." oninput="calculateChange()">
+            <p><strong>Change: ₱<span id="changeAmount">0.00</span></strong></p>
+            <p id="cashWarning" style="color: red; display: none;"></p>
+          </div>
+          
+          <div class="receipt-buttons">
+            <button onclick="checkoutAndPrint()">Checkout & Print</button>
+            <button onclick="resetReceipt()">Reset</button>
+          </div>
+        </div>
+      </div>
+    
+      <!-- Calculator Button -->
+      <button id="calculatorBtn">Calculator</button>
+      
+      <!-- Draggable Calculator -->
+      <div id="calculatorOverlay" class="calculator-overlay">
+        <div class="calculator-header" id="calculatorHeader">Calculator</div>
+        <div class="calculator-body">
+          <input type="text" id="calc-display" readonly>
+          <div class="calc-buttons">
+            <button onclick="press('7')">7</button>
+            <button onclick="press('8')">8</button>
+            <button onclick="press('9')">9</button>
+            <button onclick="press('/')">/</button>
+      
+            <button onclick="press('4')">4</button>
+            <button onclick="press('5')">5</button>
+            <button onclick="press('6')">6</button>
+            <button onclick="press('*')">*</button>
+      
+            <button onclick="press('1')">1</button>
+            <button onclick="press('2')">2</button>
+            <button onclick="press('3')">3</button>
+            <button onclick="press('-')">-</button>
+      
+            <button onclick="press('0')">0</button>
+            <button onclick="press('.')">.</button>
+            <button onclick="calculate()">=</button>
+            <button onclick="press('+')">+</button>
+      
+            <button onclick="clearCalc()" class="wide">C</button>
+            <button onclick="closeCalculator()" class="wide">Close</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Receipt Overlay -->
+      <div id="receiptOverlay" class="overlay hidden">
+        <div class="receipt-popup">
+          <h2>VIVOS MEDICAL SUPPLIES TRADING</h2>
+          <p>Cashier: <span id="receiptCashier">Michelle Vivos</span></p>
+          <p>Date: <span id="receiptDate"></span></p>
+          <p>Address: Sixto Castillo St., Poblacion 5, Tanauan City, Batangas</p>
+          <p id="receiptOrderId">Order ID: </p>
+          <hr>
+          <div id="receiptProductList"></div>
+          <hr>
+          <p><strong>Total: ₱<span id="receiptTotal">0.00</span></strong></p>
+          <p><strong>Cash Given: ₱<span id="receiptCash">0.00</span></strong></p>
+          <p><strong>Change: ₱<span id="receiptChange">0.00</span></strong></p>
+          <button onclick="closeReceiptOverlay()">Close</button>
+        </div>
+      </div>
+  </div>
+ 
+<script src="{{ url_for('static', filename='menubutton.js') }}"></script>  
+</body>
+
+
+</html>
