@@ -4,6 +4,8 @@ document.getElementById('menuButton').addEventListener('click', function() {
     menu.classList.toggle('hidden');
 });
 
+
+
 // User dropdown toggle
 document.getElementById('userIcon').addEventListener('click', function() {
 const dropdown = document.getElementById('dropdownMenu');
@@ -99,41 +101,49 @@ function closeCalculator() {
 }
 
 //Search Bar
-document.getElementById('searchBar').addEventListener('input', async function () {
-    const query = this.value.toLowerCase();
+document.addEventListener('DOMContentLoaded', function () {
+    const searchBar = document.getElementById('searchBar');
     const productList = document.getElementById('productList');
-    productList.innerHTML = ''; // Clear current product list
 
-    try {
-        const response = await fetch('/api/inventory');
-        const items = await response.json();
+    // Check if searchBar and productList exist
+    if (searchBar && productList) {
+        searchBar.addEventListener('input', async function () {
+            const query = this.value.toLowerCase();
+            productList.innerHTML = ''; // Clear current product list
 
-        const filtered = items.filter(item => item.name.toLowerCase().includes(query));
+            try {
+                const response = await fetch('/api/inventory');
+                const items = await response.json();
 
-        if (filtered.length === 0) {
-            productList.innerHTML = '<p>No matching products found.</p>';
-        } else {
-            filtered.forEach(item => {
-                const div = document.createElement('div');
-                div.classList.add('product-item');
-                
-                // Create properly structured content matching your CSS classes
-                div.innerHTML = `
-                    <p class="product-name">${item.name}</p>
-                    <p class="product-name">₱${item.shop_price.toFixed(2)}</p>
-                    <p class="product-name">In Stock: <span id="stock-${item.id}">${item.quantity}</span></p>
-                    <button onclick="addToReceipt(${item.id}, '${item.name}', ${item.shop_price})" ${item.quantity <= 0 ? 'disabled' : ''}>ADD</button>
-                `;
-                productList.appendChild(div);
-            });
-        }
-    } catch (error) {
-        console.error('Error fetching inventory:', error);
-        productList.innerHTML = '<p>Error loading products. Please try again.</p>';
+                // Filter items based on the search query
+                const filtered = items.filter(item => item.name.toLowerCase().includes(query));
+
+                if (filtered.length === 0) {
+                    productList.innerHTML = '<p>No matching products found.</p>';
+                } else {
+                    filtered.forEach(item => {
+                        const div = document.createElement('div');
+                        div.classList.add('product-item');
+
+                        // Ensure images load correctly
+                        div.innerHTML = `
+                            <img src="${item.image ? '/static/uploads/' + item.image : 'path/to/default/image.png'}" alt="${item.name}" class="product-image">
+                            <p class="product-name">${item.name}</p>
+                            <p class="product-price">₱${item.shop_price.toFixed(2)}</p>
+                            <p class="product-quantity">In Stock: <span id="stock-${item.id}">${item.quantity}</span></p>
+                            <button onclick="addToReceipt(${item.id}, '${item.name}', ${item.shop_price})" ${item.quantity <= 0 ? 'disabled' : ''}>ADD</button>
+                        `;
+                        
+                        productList.appendChild(div);
+                    });
+                }
+            } catch (error) {
+                console.error('Error fetching inventory:', error);
+                productList.innerHTML = '<p>Error loading products. Please try again.</p>';
+            }
+        });
     }
 });
-
-
 // function ng pos itong dom lng  
 document.addEventListener('DOMContentLoaded', () => {
     const productList = document.getElementById('productList');
@@ -148,25 +158,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let originalQuantities = {};
   
     function fetchProducts() {
-      fetch('/api/inventory')
-        .then(res => res.json())
-        .then(data => {
-          productList.innerHTML = ''; // Clear the product list
-          data.forEach(item => {
-            originalQuantities[item.id] = item.quantity;
-  
-            const div = document.createElement('div');
-            div.className = 'product-item';
-            div.innerHTML = `
-              <p class="product-name"><strong>${item.name}</strong><br></p>
-              <p class="product-name">₱${item.shop_price.toFixed(2)}<br></p>
-              <p class="product-name"><small>In Stock: <span id="stock-${item.id}">${item.quantity}</span></small><br></p>
-              <button onclick="addToReceipt(${item.id}, '${item.name}', ${item.shop_price})" ${item.quantity <= 0 ? 'disabled' : ''}>Add</button>
-            `;
-            productList.appendChild(div);
-          });
-        })
-        .catch(error => console.log('Error fetching products:', error));
+        fetch('/api/inventory')
+            .then(res => res.json())
+            .then(data => {
+                productList.innerHTML = ''; // Clear the product list
+                data.forEach(item => {
+                    originalQuantities[item.id] = item.quantity;
+    
+                    const div = document.createElement('div');
+                    div.className = 'product-item';
+                    div.innerHTML = `
+                        <img src="${item.image ? '/static/uploads/' + item.image : 'default_image_url.jpg'}" alt="${item.name}" class="product-image">
+                        <p class="product-name"><strong>${item.name}</strong><br></p>
+                        <p class="product-name">₱${item.shop_price.toFixed(2)}<br></p>
+                        <p class="product-name"><small>In Stock: <span id="stock-${item.id}">${item.quantity}</span></small><br></p>
+                        <button onclick="addToReceipt(${item.id}, '${item.name}', ${item.shop_price})" ${item.quantity <= 0 ? 'disabled' : ''}>Add</button>
+                    `;
+                    productList.appendChild(div);
+                });
+            })
+            .catch(error => console.log('Error fetching products:', error));
     }
 
     //for order ID 
@@ -295,27 +306,51 @@ document.addEventListener('DOMContentLoaded', () => {
         receiptCash.textContent = cashGivenValue.toFixed(2);
         receiptChange.textContent = (cashGivenValue - total).toFixed(2);
       
-        // Reset the receipt details and update cart
-        cart = {};  // Clear cart but stock remains decremented
-        updateReceiptTable();
-        cashGiven.value = '';
-        changeAmount.textContent = '0.00';
-      
-        fetchProducts();  // Refresh stock values (if needed)
-      
-        // The overlay stays until the user clicks "Close" (no timeout)
-        };      
-        // Set current date when page loads
-    document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
-  
-    // Initial fetch of products
-    fetchProducts();
-});
+                // Save receipt to backend
+                fetch('/save_receipt', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      order_id: orderIdElement.textContent,
+                      date: receiptDate.textContent,
+                      cashier: 'Michelle Vivos', 
+                      products: cart,  // <--- send products as JSON cart
+                      total_amount: total,
+                      cash_given: cashGivenValue,
+                      change: cashGivenValue - total
+                    })
+                  })
+                  .then(response => response.json())
+                  .then(data => {
+                    if (data.status === 'success') {
+                      alert('Receipt saved to history.');
+                    } else {
+                      alert('Error saving receipt.');
+                    }
+                  });
+              
+                  // Reset the receipt details and update cart
+                  cart = {};  
+                  updateReceiptTable();
+                  cashGiven.value = '';
+                  changeAmount.textContent = '0.00';
+                
+                  fetchProducts();  // Refresh stock values
+              };
+              // Initial fetch of products
+              fetchProducts();
+          });
+          
+          document.addEventListener('DOMContentLoaded', function() {
+              document.getElementById('currentDate').textContent = new Date().toLocaleDateString();
+          });
+            
 
 function closeReceiptOverlay() {
     document.getElementById("receiptOverlay").classList.add("hidden");
 }
-
 
 //inventory delete button
 function deleteItem(itemId) {
@@ -334,7 +369,6 @@ function deleteItem(itemId) {
         });
     }
 }
-
 
 //for sales page
 document.addEventListener("DOMContentLoaded", function () {
@@ -635,7 +669,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stockEl) {
                 const currentStock = parseInt(stockEl.textContent);
                 if (currentStock === warningThreshold) {
-                    alert(`⚠️ Low Stock Alert: '${name}' has only ${currentStock} items remaining. Please restock soon.`);
+                    alert(`⚠️ LOW STOCK ALERT: '${name}' has only ${currentStock} items remaining. Please restock soon.`);
                 }
             }
         }, 100);
