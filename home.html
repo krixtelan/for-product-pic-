@@ -6,56 +6,324 @@
     <title>Welcome</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+<style>
+  /* Reset styles only for the login section */
+#login-section * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  /* Login section container */
+  #login-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #d62828; /* Rich red background */
+    font-family: Arial, sans-serif;
+    color: white;
+    padding: 20px;
+    isolation: isolate; /* Creates a new stacking context */
+  }
+  
+  /* User icon within login section */
+  #login-section .user-icon {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background-color: white;
+    padding: 5px;
+    margin-bottom: 30px;
+  }
+  
+  /* Password input field within login section */
+  #login-section #loginPassword {
+    width: 300px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 25px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-align: center;
+    font-size: 16px;
+  }
+  
+  #login-section #loginPassword::placeholder {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  /* Button within login section */
+  #login-section .btn {
+    padding: 12px 30px;
+    background-color: white;
+    color: #d62828;
+    border: none;
+    border-radius: 25px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
+  
+  #login-section .btn:hover {
+    background-color: #f8f8f8;
+    transform: scale(1.05);
+  }
+  
+  /* Error message within login section */
+  #login-section .error {
+    color: white;
+    margin-top: 15px;
+    font-size: 14px;
+    text-align: center;
+  }
+  
+  /* Company name heading if you add it */
+  #login-section .company-name {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+/* Match cashier inputs to admin input design */
+#cashierUsername,
+#cashierPassword {
+    width: 300px;
+    padding: 15px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 25px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    text-align: center;
+    font-size: 16px;
+}
 
+/* Enhance buttons for all .btn elements */
+#login-section .btn {
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  transition: all 0.3s ease, box-shadow 0.3s ease;
+}
+#login-section .btn:hover {
+  box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+  background-color: #f0f0f0;
+  transform: scale(1.05);
+}
+/* Style for toggle buttons */
+#login-section .toggle-btn {
+  margin-bottom: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 25px;
+  background-color: #fff; /* or your preferred color */
+  color: #d62828;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+#login-section .toggle-btn.active {
+  background-color: #f0f0f0; /* active style */
+}
+#login-section .toggle-btn:hover {
+  background-color: #e0e0e0;
+  transform: scale(1.05);
+}
+#cashierUsername::placeholder,
+#cashierPassword::placeholder {
+  color: white;
+  opacity: 1; /* ensure full opacity in browsers that might reduce it */
+}
+/* Add these styles to your existing CSS to fix the login layout */
 
+/* Container for login forms to ensure proper vertical layout */
+#login-section .login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 300px;
+}
+
+/* Hide inactive login forms */
+#login-section .login-form {
+  display: none;
+}
+
+#login-section .login-form.active {
+  display: flex;
+}
+
+/* Style for login toggle buttons container */
+#login-section .login-toggle {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Style for signup link */
+#login-section .signup-link {
+  margin-top: 15px;
+  cursor: pointer;
+  text-decoration: underline;
+  color: white;
+  font-size: 14px;
+}
+
+/* Fix for the overlay styles */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.overlay-content h3 {
+  color: #d62828;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.overlay-content input {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.overlay-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.overlay-buttons button {
+  flex: 1;
+  padding: 10px;
+  background-color: #d62828;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.overlay-buttons button:last-child {
+  background-color: #999;
+}
+/* Hide POS content initially */
+.content-wrapper {
+    display: none;
+}
+.receipt-popup-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 15px;
+}
+</style>
 <body>
-<div id="login-section">
-  <h1 class="company-name">VIVOS MEDICAL SUPPLIES TRADING</h1>
-  <img src="{{ url_for('static', filename='vivos.jpg') }}" alt="User Icon" class="user-icon">
-  <input type="password" id="loginPassword" placeholder="Enter Password">
-  <button class="btn" onclick="login()">Login</button>
-  <div id="loginMsg" class="error"></div>
+  <div id="login-section">
+    <h1 class="company-name">VIVOS MEDICAL SUPPLIES TRADING</h1>
+    <img src="{{ url_for('static', filename='vivos.jpg') }}" alt="User Icon" class="user-icon">
+    
+    <!-- Login toggle buttons -->
+    <div class="login-toggle">
+        <button id="adminToggle" class="toggle-btn active" onclick="toggleLogin('admin')">Admin</button>
+        <button id="cashierToggle" class="toggle-btn" onclick="toggleLogin('cashier')">Cashier</button>
+    </div>
+    
+    <!-- Admin Login Form -->
+    <div id="adminLogin" class="login-form active">
+        <input type="password" id="loginPassword" placeholder="Enter Password">
+        <button class="btn" onclick="login()">Login</button>
+        <div id="loginMsg" class="error"></div>
+    </div>
+    
+    <!-- Cashier Login Form -->
+    <div id="cashierLogin" class="login-form">
+        <input type="text" id="cashierUsername" placeholder="Enter Username">
+        <input type="password" id="cashierPassword" placeholder="Enter Password">
+        <button class="btn" onclick="cashierLogin()">Login</button>
+        <div id="cashierLoginMsg" class="error"></div>
+        <div class="signup-link" onclick="showOverlay('signupOverlay')">New cashier? Sign up here</div>
+    </div>
 </div>
 
- 
-  
+<!-- Signup Overlay -->
+<div id="signupOverlay" class="overlay hidden">
+    <div class="overlay-content">
+        <h3>Cashier Sign Up</h3>
+        <input type="text" id="newFullName" placeholder="Full Name">
+        <input type="text" id="newUsername" placeholder="Username">
+        <input type="password" id="newPassword" placeholder="Password">
+        <input type="password" id="confirmPassword" placeholder="Confirm Password">
+        <div class="overlay-buttons">
+            <button onclick="registerCashier()">Register</button>
+            <button onclick="closeOverlay('signupOverlay')">Cancel</button>
+        </div>
+        <div id="signupMsg" class="error" style="color: #d62828;"></div>
+    </div>
+</div>
+
 
     <div class="header-wrapper">
     <header>
-        <button id="menuButton">☰</button>
-        <h1>VIVOS MEDICAL SUPPLIES TRADING</h1>
-        <nav id="menu" class="hidden">
+    <button id="menuButton">☰</button>
+    <h1>VIVOS MEDICAL SUPPLIES TRADING</h1>
+    <nav id="menu" class="hidden">
             <ul>
-              <li><a href="{{ url_for('home') }}">Home</a></li>
+              <li><a href="{{ url_for('home') }}">POS</a></li>
               <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
               <li><a href="{{ url_for('sales') }}">Report</a></li>
               <li><a href="{{ url_for('about') }}">Order History</a></li>
             </ul>
-        </nav>
-    
-        <div class="account-menu">
-          <img src="{{ url_for('static', filename='redicon.jpg') }}" alt="User" class="user-icon" id="userIcon">
-          <div class="dropdown-menu" id="dropdownMenu">
-            <p id="userRole" class="label">MICHELLE VIVOS</p>
-            <hr>
-           
-            <a href="#" onclick="showOverlay('changePasswordOverlay')">Change Password</a>
-            <a id="logoutBtn">Logout</a>
+    </nav>
+
+    <div class="account-menu">
+       <img src="{{ url_for('static', filename='redicon.jpg') }}" alt="User" class="user-icon" id="userIcon">
+       <div class="dropdown-menu" id="dropdownMenu">
+       <p id="userRole" class="label">MICHELLE VIVOS</p>
+       <hr>   
+       <a href="#" onclick="showOverlay('changePasswordOverlay')">Change Password</a>
+          <a id="logoutBtn">Logout</a>
           </div>
-        </div>
+    </div>
          
-        <!-- Overlay for Change Password -->
-        <div id="changePasswordOverlay" class="overlay hidden">
-          <div class="overlay-content">
-            <h3>Change Password</h3>
-            <input type="password" placeholder="Current Password">
-            <input type="password" placeholder="New Password">
-            <input type="password" placeholder="Confirm Password">
-            <button onclick="updatePassword()">Update</button>
-            <button onclick="closeOverlay('changePasswordOverlay')">Cancel</button>
-          </div>
+  <!-- Overlay for Change Password -->
+  <div id="changePasswordOverlay" class="overlay hidden">
+        <div class="overlay-content">
+          <h3>Change Password</h3>
+          <input type="password" placeholder="Current Password">
+          <input type="password" placeholder="New Password">
+          <input type="password" placeholder="Confirm Password">
+          <button onclick="updatePassword()">Update</button>
+          <button onclick="closeOverlay('changePasswordOverlay')">Cancel</button>
         </div>
-    </header>
+  </div>
+  </header>
     </div>
 
     <div class="content-wrapper">
@@ -64,16 +332,16 @@
           <input type="text" id="searchBar" placeholder="Search products...">
           <div id="productList">
             <!-- Sample product items -->
-            <div id="productList">
+            <div>
 
             </div>
-          </div>
+          </div> 
         </div>
       
         <div class="receipt-section">
           <div class="receipt-header">
             <h2>VIVOS MEDICAL SUPPLIES TRADING</h2>
-            <p>Cashier: Michelle Vivos</p>
+            <p>Cashier: <span id="receiptCashier">Michelle vivos</span></p>
             <p>Date: <span id="currentDate"></span></p>
             <p>Address: Sixto Castillo St., Poblacion 5, Tanauan City, Batangas</p>
           </div>
@@ -137,21 +405,300 @@
       <div id="receiptOverlay" class="overlay hidden">
         <div class="receipt-popup">
           <h2>VIVOS MEDICAL SUPPLIES TRADING</h2>
-          <p>Cashier: <span id="receiptCashier">Michelle Vivos</span></p>
+          <p>Cashier: <span id="receiptCashier">Michelle vivos</span></p>
           <p>Date: <span id="receiptDate"></span></p>
           <p>Address: Sixto Castillo St., Poblacion 5, Tanauan City, Batangas</p>
-          <p id="receiptOrderId">Order ID: </p>
+          <p id="receiptOrderId">Order ID: </p>    
           <hr>
           <div id="receiptProductList"></div>
           <hr>
           <p><strong>Total: ₱<span id="receiptTotal">0.00</span></strong></p>
           <p><strong>Cash Given: ₱<span id="receiptCash">0.00</span></strong></p>
           <p><strong>Change: ₱<span id="receiptChange">0.00</span></strong></p>
+          <button onclick="printReceipt()">Print</button>
           <button onclick="closeReceiptOverlay()">Close</button>
         </div>
       </div>
   </div>
- 
+  <script>
+    // Function to toggle between login forms
+    function toggleLogin(type) {
+        // Update toggle buttons
+        document.getElementById('adminToggle').classList.remove('active');
+        document.getElementById('cashierToggle').classList.remove('active');
+        document.getElementById(type + 'Toggle').classList.add('active');
+        
+        // Update visible form
+        document.getElementById('adminLogin').classList.remove('active');
+        document.getElementById('cashierLogin').classList.remove('active');
+        document.getElementById(type + 'Login').classList.add('active');
+        
+        // Clear any error messages
+        document.getElementById('loginMsg').textContent = '';
+        document.getElementById('cashierLoginMsg').textContent = '';
+    }
+    // Toggle dropdown menu on icon click
+document.getElementById('userIcon').addEventListener('click', function() {
+    const menu = document.getElementById('dropdownMenu');
+    if (menu.style.display === 'flex') {
+        menu.style.display = 'none';
+    } else {
+        menu.style.display = 'flex';
+    }
+});
+    
+    // Function to show overlay
+    function showOverlay(overlayId) {
+        document.getElementById(overlayId).classList.remove('hidden');
+    }
+    
+    // Function to close overlay
+    function closeOverlay(overlayId) {
+        document.getElementById(overlayId).classList.add('hidden');
+    }
+    
+    // Existing admin login function
+    function login() {
+        var password = document.getElementById('loginPassword').value;
+        if (password == '') {
+            document.getElementById('loginMsg').textContent = 'Please enter password';
+            return;
+        }
+        
+        // Your existing login logic here
+        // For demonstration:
+        document.getElementById('loginMsg').textContent = 'Processing login...';
+        updateHeader();
+      }
+    
+    // New cashier login function
+    function cashierLogin() {
+        var username = document.getElementById('cashierUsername').value;
+        var password = document.getElementById('cashierPassword').value;
+        
+        if (username == '' || password == '') {
+            document.getElementById('cashierLoginMsg').textContent = 'Please enter both username and password';
+            return;
+        }
+        
+        // Add your cashier login logic here
+        // For demonstration:
+        document.getElementById('cashierLoginMsg').textContent = 'Processing cashier login...';
+    }
+    
+    // Function to register new cashier
+    function registerCashier() {
+        var fullName = document.getElementById('newFullName').value;
+        var username = document.getElementById('newUsername').value;
+        var password = document.getElementById('newPassword').value;
+        var confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Validation
+        if (fullName == '' || username == '' || password == '' || confirmPassword == '') {
+            document.getElementById('signupMsg').textContent = 'Please fill all fields';
+            return;
+        }
+        
+        if (password != confirmPassword) {
+            document.getElementById('signupMsg').textContent = 'Passwords do not match';
+            return;
+        }
+        
+        // Add your registration logic here
+        // For demonstration:
+        document.getElementById('signupMsg').textContent = 'Processing registration...';
+        
+        // After successful registration, you would typically:
+        // 1. Close the overlay
+        // 2. Show a success message in the cashier login form
+        setTimeout(function() {
+           closeOverlay('signupOverlay');
+             document.getElementById('cashierLoginMsg').textContent = 'Registration successful! Please login.';
+         }, 2000);
+    }
+    let currentCashierFullName = '';
+
+    function cashierLogin() {
+    const username = document.getElementById('cashierUsername').value;
+    const password = document.getElementById('cashierPassword').value;
+    fetch('/cashier/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({username, password})
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 'success') {
+    // Save the fullname in a global variable
+    currentCashierFullName = data.fullname;
+
+    // Update the receipt display
+    document.getElementById('receiptCashier').textContent = currentCashierFullName;
+
+    // Update display in account menu
+    document.querySelector('.account-menu #userRole').textContent = currentCashierFullName;
+
+    // Hide login form and show POS
+    document.getElementById('login-section').style.display = 'none';
+    document.querySelector('.content-wrapper').style.display = 'block';
+
+
+        } else {
+            document.getElementById('cashierLoginMsg').textContent = data.message;
+            updateHeader();
+          }
+    });
+}
+
+function logout() {
+  fetch('/cashier/logout')
+    .then(res => res.json())
+    .then(() => {
+      // Show login, hide POS, etc.
+      // ...
+      updateHeader();
+    });
+}
+
+
+function updateHeader() {
+  fetch('/check_session')
+    .then(res => res.json())
+    .then(data => {
+      const menuBtn = document.getElementById('menuButton');
+      const userNameSpan = document.querySelector('.account-menu #userRole');
+
+      if (data.loggedIn) {
+        // Always show header and user icon
+        document.querySelector('.account-menu').style.display = 'block';
+
+        // Set user name
+        if (userNameSpan) {
+          userNameSpan.textContent = data.fullname;
+        }
+
+        // Show menu icon only if admin
+        if (menuBtn) {
+          if (data.role === 'admin') {
+            menuBtn.style.display = 'block';
+          } else {
+            menuBtn.style.display = 'none'; // hide for cashier
+          }
+        }
+      } else {
+        // Not logged in: you can hide header or keep visible
+        // For now, keep header visible
+        if (menuBtn) menuBtn.style.display = 'block';
+        document.querySelector('.account-menu').style.display = 'none';
+      }
+    });
+}
+
+window.onload = () => {
+  // Check session and update header accordingly
+  updateHeader();
+
+  // existing code: show POS if logged in
+  fetch('/check_session')
+    .then(res => res.json())
+    .then(data => {
+      if (data.loggedIn) {
+        document.querySelector('.account-menu #userRole').textContent = data.fullname;
+        document.getElementById('login-section').style.display = 'none';
+        document.querySelector('.content-wrapper').style.display = 'block';
+      }
+    });
+};
+
+// Similar approach for registration
+function registerCashier() {
+    const fullname = document.getElementById('newFullName').value;
+    const username = document.getElementById('newUsername').value;
+    const password = document.getElementById('newPassword').value;
+    fetch('/cashier/register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({fullname, username, password})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('Registration successful! Please login.');
+            closeOverlay('signupOverlay');
+        } else {
+            document.getElementById('signupMsg').textContent = data.message;
+        }
+    });
+}
+window.onload = function() {
+  // Assuming you send a request to check session status
+  fetch('/check_session')
+    .then(res => res.json())
+    .then(data => {
+      if (data.loggedIn) {
+        // Show POS
+        document.querySelector('.account-menu #userRole').textContent = data.fullname;
+        document.getElementById('login-section').style.display = 'none';
+        document.querySelector('.content-wrapper').style.display = 'block';
+      }
+    });
+};
+function showPOS() {
+  document.getElementById('login-section').style.display = 'none';
+  document.querySelector('.content-wrapper').style.display = 'block';
+  document.getElementById('menuButton').style.display = 'none';
+  document.querySelector('.account-menu').style.display = 'block';
+  document.getElementById('userIcon').style.display = 'block';
+}
+
+function checkSession() {
+  fetch('/check_session')
+    .then(res => res.json())
+    .then(data => {
+      if (data.loggedIn) {
+        showPOS();
+      }
+    });
+}
+function checkoutAndPrint() {
+    prepareReceipt();
+    // Suppose cashierFullname is stored in a variable after login
+    // For example, you can save it globally after login
+    window.currentCashierFullName = document.querySelector('.account-menu #userRole').textContent;
+
+    // Then, update the receipt span
+    document.getElementById('receiptCashier').textContent = window.currentCashierFullName;
+
+    // Proceed with printing...
+}
+function prepareReceipt() {
+    document.getElementById('receiptCashier').textContent = currentCashierFullName;
+    // any other receipt setup
+}
+// for printing reciept 
+function printReceipt() {
+    const receiptContent = document.querySelector('.receipt-popup').innerHTML;
+    const printWindow = window.open('', '', 'height=600,width=800');
+    printWindow.document.write('<html><head><title>Receipt</title>');
+    // Optional: add styles for print
+    printWindow.document.write('<style>');
+    printWindow.document.write(`
+      body { font-family: Arial, sans-serif; padding: 20px; }
+      h2 { text-align: center; }
+      hr { margin: 10px 0; }
+      .receipt-popup { max-width: 400px; margin: auto; }
+      /* Add any other styles you want for printing */
+    `);
+    printWindow.document.write('</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(receiptContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+}
+</script>
 <script src="{{ url_for('static', filename='menubutton.js') }}"></script>  
 </body>
 
